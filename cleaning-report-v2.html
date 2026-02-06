@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>클리닝 리포트 도구</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #F5F5F7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* 상단 헤더 */
+        .top-header {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .top-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .top-title svg {
+            color: #A855F7;
+        }
+
+        .top-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .save-button {
+            background: #A855F7;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .save-button:hover {
+            background: #9333EA;
+        }
+
+        .reset-button {
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 10px;
+            padding: 12px 20px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .reset-button:hover {
+            background: #F9F9F9;
+        }
+
+        /* 날짜 선택 */
+        .date-section {
+            background: #FFFFFF;
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .date-label {
+            color: #A855F7;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .date-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #E5E5E5;
+            border-radius: 10px;
+            font-size: 16px;
+            color: #1a1a1a;
+            background: #FFFFFF;
+            outline: none;
+        }
+
+        .date-input:focus {
+            border-color: #A855F7;
+        }
+
+        /* 리포트 영역 */
+        #report {
+            background: #1a1a1a;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .report-title-area {
+        }
+
+        .report-title {
+            color: #FFFFFF;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .report-subtitle {
+            color: rgba(255,255,255,0.4);
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .report-date-area {
+            text-align: right;
+        }
+
+        .report-date {
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .report-date-label {
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        /* 이미지 섹션 */
+        .image-section-title {
+            color: #A855F7;
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+
+        .image-box {
+            background: #4A4A4A;
+            border-radius: 12px;
+            aspect-ratio: 4/3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .image-box:hover {
+            background: #555555;
+        }
+
+        .image-box.has-image {
+            background: transparent;
+        }
+
+        .image-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .upload-text {
+            color: rgba(255,255,255,0.5);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .upload-formats {
+            color: rgba(255,255,255,0.3);
+            font-size: 12px;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* 푸터 */
+        .report-footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .footer-title {
+            color: #A855F7;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+
+        .footer-subtitle {
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 480px) {
+            .top-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .top-buttons {
+                width: 100%;
+            }
+
+            .save-button, .reset-button {
+                flex: 1;
+                justify-content: center;
+            }
+
+            #report {
+                padding: 24px;
+            }
+
+            .report-title {
+                font-size: 20px;
+            }
+
+            .report-date {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 상단 헤더 -->
+        <div class="top-header">
+            <div class="top-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 3L14.5 8.5L21 9.5L16.5 14L17.5 21L12 18L6.5 21L7.5 14L3 9.5L9.5 8.5L12 3Z"/>
+                </svg>
+                클리닝 리포트 도구
+            </div>
+            <div class="top-buttons">
+                <button class="save-button" id="saveBtn" onclick="saveAsImage()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3V11M8 11L4 7M8 11L12 7"/>
+                        <path d="M3 13H13"/>
+                    </svg>
+                    이미지로 저장하기
+                </button>
+                <button class="reset-button" onclick="resetAll()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2 8C2 4.5 5 2 8 2C11 2 14 4.5 14 8C14 11.5 11 14 8 14C6 14 4.5 13 3.5 11.5"/>
+                        <path d="M2 4V8H6"/>
+                    </svg>
+                    초기화
+                </button>
+            </div>
+        </div>
+
+        <!-- 날짜 선택 -->
+        <div class="date-section">
+            <div class="date-label">작업 날짜 선택</div>
+            <input type="date" class="date-input" id="cleaningDate">
+        </div>
+
+        <!-- 리포트 -->
+        <div id="report">
+            <div class="report-header">
+                <div class="report-title-area">
+                    <div class="report-title">클리닝 리포트</div>
+                    <div class="report-subtitle">VISUAL WORK RECORD</div>
+                </div>
+                <div class="report-date-area">
+                    <div class="report-date" id="displayDate">2026-02-06</div>
+                    <div class="report-date-label">SERVICE DATE</div>
+                </div>
+            </div>
+
+            <div class="image-section-title">AFTER CLEANING</div>
+
+            <div class="image-box" id="afterBox" onclick="document.getElementById('afterImage').click()">
+                <input type="file" id="afterImage" accept="image/*" onchange="loadImage(this)">
+                <svg class="upload-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="10" width="36" height="28" rx="4"/>
+                    <circle cx="18" cy="22" r="4"/>
+                    <path d="M6 34L16 26L24 32L36 22L42 28"/>
+                </svg>
+                <div class="upload-text">클릭하여 이미지 업로드</div>
+                <div class="upload-formats">JPG, PNG, WEBP</div>
+            </div>
+
+            <div class="report-footer">
+                <div class="footer-title">CLEANING SERVICE QUALITY REPORT</div>
+                <div class="footer-subtitle">Quality Assurance Guaranteed</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 오늘 날짜 기본값
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('cleaningDate').value = today;
+        document.getElementById('displayDate').textContent = today;
+
+        // 날짜 변경
+        document.getElementById('cleaningDate').addEventListener('change', function(e) {
+            document.getElementById('displayDate').textContent = e.target.value;
+        });
+
+        function loadImage(input) {
+            const box = document.getElementById('afterBox');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    box.innerHTML = `
+                        <input type="file" id="afterImage" accept="image/*" onchange="loadImage(this)">
+                        <img src="${e.target.result}" class="preview-image" alt="클리닝 완료">
+                    `;
+                    box.classList.add('has-image');
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function resetAll() {
+            // 날짜 초기화
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('cleaningDate').value = today;
+            document.getElementById('displayDate').textContent = today;
+
+            // 이미지 초기화
+            const box = document.getElementById('afterBox');
+            box.innerHTML = `
+                <input type="file" id="afterImage" accept="image/*" onchange="loadImage(this)">
+                <svg class="upload-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="10" width="36" height="28" rx="4"/>
+                    <circle cx="18" cy="22" r="4"/>
+                    <path d="M6 34L16 26L24 32L36 22L42 28"/>
+                </svg>
+                <div class="upload-text">클릭하여 이미지 업로드</div>
+                <div class="upload-formats">JPG, PNG, WEBP</div>
+            `;
+            box.classList.remove('has-image');
+        }
+
+        async function saveAsImage() {
+            const btn = document.getElementById('saveBtn');
+            const reportElement = document.getElementById('report');
+            
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 저장 중...';
+            
+            try {
+                const canvas = await html2canvas(reportElement, {
+                    scale: 2,
+                    backgroundColor: '#1a1a1a',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                const link = document.createElement('a');
+                const dateStr = document.getElementById('cleaningDate').value.replace(/-/g, '');
+                link.download = `클리닝리포트_${dateStr}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                btn.innerHTML = '✅ 저장 완료!';
+                setTimeout(() => {
+                    btn.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3V11M8 11L4 7M8 11L12 7"/>
+                            <path d="M3 13H13"/>
+                        </svg>
+                        이미지로 저장하기
+                    `;
+                    btn.disabled = false;
+                }, 2000);
+            } catch (error) {
+                alert('이미지 저장 중 오류가 발생했습니다.');
+                console.error(error);
+                btn.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M8 3V11M8 11L4 7M8 11L12 7"/>
+                        <path d="M3 13H13"/>
+                    </svg>
+                    이미지로 저장하기
+                `;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
